@@ -1,0 +1,70 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "required": ["logical_id", "instance_type", "vpc_ref"],
+  "properties": {
+    "logical_id": {
+      "type": "string",
+      "pattern": "^[a-z0-9-]+$",
+      "minLength": 1,
+      "maxLength": 255,
+      "description": "Logical identifier for the EC2 instance"
+    },
+    "instance_type": {
+      "type": "string",
+      "pattern": "^[a-z][0-9][a-z]?\\.[a-z0-9]+$",
+      "description": "EC2 instance type (e.g., t3.medium)"
+    },
+    "ami_id": {
+      "type": "string",
+      "description": "AMI ID or SSM parameter reference"
+    },
+    "vpc_ref": {
+      "type": "string",
+      "pattern": "^\\$\\{resource\\.[a-z0-9-]+\\.id\\}$",
+      "description": "Reference to VPC resource"
+    },
+    "subnet_ref": {
+      "type": "string",
+      "pattern": "^\\$\\{resource\\.[a-z0-9-]+\\.[a-z0-9_]+\\}$",
+      "description": "Reference to subnet"
+    },
+    "enable_session_manager": {
+      "type": "boolean",
+      "default": true,
+      "description": "Enable AWS Systems Manager Session Manager"
+    },
+    "enable_detailed_monitoring": {
+      "type": "boolean",
+      "default": false,
+      "description": "Enable CloudWatch detailed monitoring"
+    },
+    "root_volume": {
+      "type": "object",
+      "properties": {
+        "size": {
+          "type": "integer",
+          "minimum": 8,
+          "maximum": 16384,
+          "default": 30,
+          "description": "Root volume size in GB"
+        },
+        "encrypted": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable EBS encryption"
+        },
+        "volume_type": {
+          "type": "string",
+          "enum": ["gp2", "gp3", "io1", "io2"],
+          "default": "gp3",
+          "description": "EBS volume type"
+        }
+      }
+    },
+    "user_data_script": {
+      "type": "string",
+      "description": "User data script for instance initialization"
+    }
+  }
+}

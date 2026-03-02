@@ -1,0 +1,88 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "versioning_enabled": {
+      "type": "boolean",
+      "default": true,
+      "description": "Enable bucket versioning"
+    },
+    "encryption": {
+      "type": "string",
+      "enum": ["aws:kms", "AES256"],
+      "default": "AES256",
+      "description": "Server-side encryption type"
+    },
+    "kms_key_ref": {
+      "type": "string",
+      "pattern": "^\\$\\{resource\\.[a-z0-9-]+\\.id\\}$",
+      "description": "Reference to KMS key (required if encryption is aws:kms)"
+    },
+    "block_public_access": {
+      "type": "boolean",
+      "default": true,
+      "description": "Block all public access to the bucket"
+    },
+    "lifecycle_rules": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "enabled"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique identifier for the lifecycle rule"
+          },
+          "enabled": {
+            "type": "boolean",
+            "description": "Whether the rule is enabled"
+          },
+          "transitions": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["storage_class", "days"],
+              "properties": {
+                "storage_class": {
+                  "type": "string",
+                  "enum": ["STANDARD_IA", "INTELLIGENT_TIERING", "ONEZONE_IA", "GLACIER", "DEEP_ARCHIVE"],
+                  "description": "Target storage class"
+                },
+                "days": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "description": "Number of days after object creation"
+                }
+              }
+            }
+          },
+          "expiration_days": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "Number of days until object expiration"
+          }
+        }
+      },
+      "description": "Lifecycle rules for automatic transitions"
+    },
+    "access_logging": {
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "default": false,
+          "description": "Enable access logging"
+        },
+        "target_bucket_ref": {
+          "type": "string",
+          "pattern": "^\\$\\{resource\\.[a-z0-9-]+\\.id\\}$",
+          "description": "Reference to target bucket for logs"
+        },
+        "prefix": {
+          "type": "string",
+          "description": "Prefix for log objects"
+        }
+      }
+    }
+  }
+}

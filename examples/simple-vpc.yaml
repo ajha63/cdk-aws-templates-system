@@ -1,0 +1,34 @@
+version: "1.0"
+
+metadata:
+  project: example-project
+  owner: infrastructure-team
+  cost_center: engineering
+  description: Simple VPC example for CLI demonstration
+
+environments:
+  dev:
+    name: dev
+    account_id: "123456789012"
+    region: us-east-1
+    tags:
+      Environment: dev
+      Team: infrastructure
+
+deployment_rules:
+  - EncryptionEnforcementRule
+  - TagComplianceRule
+
+resources:
+  - logical_id: vpc-main
+    resource_type: vpc
+    properties:
+      cidr: "10.0.0.0/16"
+      availability_zones: 2
+      enable_dns_hostnames: true
+      enable_dns_support: true
+      enable_flow_logs: true
+      nat_gateways: 1
+    tags:
+      Purpose: networking
+      Tier: infrastructure

@@ -1,0 +1,35 @@
+# Ejemplo Básico: VPC Simple
+# Este ejemplo crea una VPC con subnets públicas y privadas
+
+version: '1.0'
+
+metadata:
+  project: ejemplo-basico
+  owner: equipo-infraestructura
+  cost_center: ingenieria
+  description: Ejemplo básico de VPC con CDK Templates
+
+environments:
+  dev:
+    name: dev
+    account_id: '123456789012'
+    region: us-east-1
+    tags: {}
+    overrides: {}
+
+resources:
+  - logical_id: vpc-ejemplo
+    resource_type: vpc
+    properties:
+      cidr: '10.0.0.0/16'
+      availability_zones: 2
+      enable_dns_hostnames: true
+      enable_dns_support: true
+      enable_flow_logs: true
+      nat_gateways: 1
+    tags:
+      Component: networking
+      Purpose: ejemplo
+    depends_on: []
+
+deployment_rules: []

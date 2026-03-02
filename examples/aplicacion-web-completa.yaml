@@ -1,0 +1,164 @@
+# Ejemplo Completo: Aplicación Web con Base de Datos
+# Este ejemplo despliega una arquitectura completa para una aplicación web
+
+version: '1.0'
+
+metadata:
+  project: app-web
+  owner: equipo-desarrollo
+  cost_center: producto
+  description: Aplicación web con EC2, RDS y S3
+
+environments:
+  dev:
+    name: dev
+    account_id: '123456789012'
+    region: us-east-1
+    tags:
+      Environment: development
+    overrides:
+      # En dev usamos instancias más pequeñas
+      ec2-web:
+        properties:
+          instance_type: t3.micro
+      rds-app:
+        properties:
+          instance_class: db.t3.micro
+          multi_az: false
+
+  prod:
+    name: prod
+    account_id: '987654321098'
+    region: us-east-1
+    tags:
+      Environment: production
+    overrides:
+      # En prod usamos instancias más grandes y alta disponibilidad
+      ec2-web:
+        properties:
+          instance_type: t3.medium
+          enable_detailed_monitoring: true
+      rds-app:
+        properties:
+          instance_class: db.r5.large
+          multi_az: true
+          backup_retention_days: 30
+
+resources:
+  # 1. VPC - Red privada virtual
+  - logical_id: vpc-app
+    resource_type: vpc
+    properties:
+      cidr: '10.0.0.0/16'
+      availability_zones: 3
+      enable_dns_hostnames: true
+      enable_dns_support: true
+      enable_flow_logs: true
+      nat_gateways: 1
+    tags:
+      Component: networking
+      Tier: infrastructure
+    depends_on: []
+
+  # 2. Instancia EC2 - Servidor web
+  - logical_id: ec2-web
+    resource_type: ec2
+    properties:
+      instance_type: t3.small  # Valor por defecto, se sobrescribe por entorno
+      vpc_ref: '${resource.vpc-app.id}'
+      enable_session_manager: true
+      enable_detailed_monitoring: false
+      root_volume:
+        size: 30
+        encrypted: true
+        volume_type: gp3
+      user_data_script: |
+        #!/bin/bash
+        # Actualizar sistema
+        yum update -y
+        
+        # Instalar Node.js
+        curl -sL https://rpm.nodesource.com/setup_18.x | bash -
+        yum install -y nodejs
+        
+        # Instalar nginx
+        amazon-linux-extras install nginx1 -y
+        systemctl start nginx
+        systemctl enable nginx
+        
+        # Configurar aplicación
+        mkdir -p /var/www/app
+        cd /var/www/app
+        
+        echo "Servidor web configurado correctamente"
+    tags:
+      Component: web-server
+      Tier: application
+    depends_on:
+      - vpc-app
+
+  # 3. Base de Datos RDS - PostgreSQL
+  - logical_id: rds-app
+    resource_type: rds
+    properties:
+      engine: postgres
+      engine_version: '15.3'
+      instance_class: db.t3.small  # Valor por defecto
+      allocated_storage: 100
+      multi_az: false  # Valor por defecto
+      vpc_ref: '${resource.vpc-app.id}'
+      backup_retention_days: 7
+      preferred_backup_window: '03:00-04:00'
+      encryption_enabled: true
+      storage_encrypted: true
+    tags:
+      Component: database
+      Tier: data
+    depends_on:
+      - vpc-app
+
+  # 4. Bucket S3 - Almacenamiento de archivos estáticos
+  - logical_id: s3-assets
+    resource_type: s3
+    properties:
+      versioning_enabled: true
+      encryption: AES256
+      block_public_access: true
+      lifecycle_rules:
+        - id: optimize-storage
+          enabled: true
+          transitions:
+            - storage_class: STANDARD_IA
+              days: 30
+            - storage_class: GLACIER
+              days: 90
+          expiration_days: 365
+    tags:
+      Component: storage
+      Tier: data
+      Purpose: static-assets
+    depends_on: []
+
+  # 5. Bucket S3 - Backups
+  - logical_id: s3-backups
+    resource_type: s3
+    properties:
+      versioning_enabled: true
+      encryption: aws:kms
+      block_public_access: true
+      lifecycle_rules:
+        - id: archive-old-backups
+          enabled: true
+          transitions:
+            - storage_class: GLACIER
+              days: 7
+            - storage_class: DEEP_ARCHIVE
+              days: 30
+          expiration_days: 90
+    tags:
+      Component: storage
+      Tier: data
+      Purpose: backups
+    depends_on: []
+
+deployment_rules: []
