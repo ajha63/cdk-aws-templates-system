@@ -24,22 +24,29 @@ El CDK AWS Templates System es un framework en Python que te permite desplegar i
 
 1. Clona el repositorio:
 ```bash
-git clone <repository-url>
-cd cdk_templates
+git clone https://github.com/ajha63/cdk-aws-templates-system.git
+cd cdk-aws-templates-system
 ```
 
-2. Crea un entorno virtual:
+2. Opción A - Instalación Automática (Recomendado):
 ```bash
+./install.sh
+```
+
+2. Opción B - Instalación Manual:
+```bash
+# Crear entorno virtual
 python -m venv venv
 source venv/bin/activate  # En Windows: venv\Scripts\activate
-```
 
-3. Instala las dependencias:
-```bash
+# Instalar dependencias
 pip install -r requirements.txt
+
+# Instalar el paquete en modo desarrollo
+pip install -e .
 ```
 
-4. Verifica la instalación:
+3. Verifica la instalación:
 ```bash
 python -m pytest tests/ -v
 ```

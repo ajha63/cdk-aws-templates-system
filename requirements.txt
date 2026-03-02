@@ -1,0 +1,21 @@
+# Core dependencies
+pyyaml>=6.0
+jsonschema>=4.17.0
+click>=8.0.0
+rich>=13.0.0
+
+# AWS CDK dependencies
+aws-cdk-lib>=2.0.0
+constructs>=10.0.0
+
+# Testing dependencies
+pytest>=7.0.0
+hypothesis>=6.0.0
+pytest-cov>=4.0.0
+
+# Development dependencies
+black>=23.0.0
+mypy>=1.0.0
+
+# Additional utilities
+python-dateutil>=2.8.0

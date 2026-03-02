@@ -25,6 +25,8 @@ venv/
 env/
 ENV/
 .venv
+env.bak/
+venv.bak/
 
 # Testing
 .pytest_cache/
@@ -32,6 +34,10 @@ ENV/
 htmlcov/
 .tox/
 .hypothesis/
+*.cover
+.coverage.*
+coverage.xml
+nosetests.xml
 
 # IDEs
 .vscode/
@@ -39,11 +45,27 @@ htmlcov/
 *.swp
 *.swo
 *~
+.project
+.pydevproject
+.settings/
 
 # OS
 .DS_Store
 Thumbs.db
+*.bak
 
 # Project specific
 *.log
 .mypy_cache/
+.dmypy.json
+dmypy.json
+
+# CDK
+cdk.out/
+cdk.context.json
+.cdk.staging/
+
+# Generated files
+generated/
+*.pyc
+*.pyo
