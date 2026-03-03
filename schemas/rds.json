@@ -1,15 +1,8 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "type": "object",
-  "required": ["logical_id", "engine", "instance_class", "vpc_ref"],
+  "required": ["engine", "instance_class", "vpc_ref"],
   "properties": {
-    "logical_id": {
-      "type": "string",
-      "pattern": "^[a-z0-9-]+$",
-      "minLength": 1,
-      "maxLength": 63,
-      "description": "Logical identifier for the RDS instance"
-    },
     "engine": {
       "type": "string",
       "enum": ["postgres", "mysql", "mariadb", "oracle-se2", "sqlserver-ex", "sqlserver-web", "sqlserver-se", "sqlserver-ee"],
@@ -38,14 +31,12 @@
     },
     "vpc_ref": {
       "type": "string",
-      "pattern": "^\\$\\{resource\\.[a-z0-9-]+\\.id\\}$",
       "description": "Reference to VPC resource"
     },
     "subnet_refs": {
       "type": "array",
       "items": {
-        "type": "string",
-        "pattern": "^\\$\\{resource\\.[a-z0-9-]+\\.[a-z0-9_]+\\}$"
+        "type": "string"
       },
       "minItems": 2,
       "description": "References to private subnets"
