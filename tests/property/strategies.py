@@ -286,7 +286,7 @@ def invalid_resource_config_strategy(draw):
 
     else:  # s3
         if violation_type == 'missing_required':
-            # S3 only requires logical_id, which is in ResourceConfig
+            # S3 has no required fields in properties
             # So we'll use wrong_type instead
             properties = {
                 'versioning_enabled': 'yes'  # string instead of boolean
@@ -296,9 +296,10 @@ def invalid_resource_config_strategy(draw):
                 'versioning_enabled': 123  # int instead of boolean
             }
         elif violation_type == 'pattern_mismatch':
-            # Invalid logical_id pattern (will be caught at ResourceConfig level)
+            # Invalid kms_key_ref pattern
             properties = {
-                'versioning_enabled': True
+                'encryption': 'aws:kms',
+                'kms_key_ref': 'invalid-reference-format'  # doesn't match pattern
             }
         elif violation_type == 'out_of_range':
             # Not applicable for S3, use invalid_enum
@@ -310,15 +311,12 @@ def invalid_resource_config_strategy(draw):
                 'encryption': 'RSA'  # not in enum (should be aws:kms or AES256)
             }
 
-    # For pattern_mismatch on logical_id, create invalid logical_id
-    if violation_type == 'pattern_mismatch' and resource_type == 's3':
-        logical_id = 'INVALID_ID_WITH_CAPS'
-    else:
-        logical_id = draw(st.text(
-            min_size=3,
-            max_size=30,
-            alphabet=st.characters(whitelist_categories=('Ll', 'Nd'), whitelist_characters='-')
-        ))
+    # Generate valid logical_id (pattern validation moved to resource level)
+    logical_id = draw(st.text(
+        min_size=3,
+        max_size=30,
+        alphabet=st.characters(whitelist_categories=('Ll', 'Nd'), whitelist_characters='-')
+    ))
 
     return ResourceConfig(
         logical_id=logical_id,

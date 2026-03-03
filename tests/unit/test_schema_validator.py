@@ -356,17 +356,16 @@ class TestSchemaValidator:
         validator = SchemaValidator()
         
         rds_config = {
-            # Missing logical_id, engine, instance_class, vpc_ref
+            # Missing engine, instance_class, vpc_ref (logical_id is at resource level, not in properties)
             "allocated_storage": 100
         }
         
         result = validator.validate_resource("rds", rds_config)
         
         assert not result.is_valid
-        assert len(result.errors) >= 4  # At least 4 missing required fields
+        assert len(result.errors) >= 3  # At least 3 missing required fields
         # Check that all missing fields are reported
         error_messages = " ".join([e.message for e in result.errors])
-        assert "logical_id" in error_messages.lower()
         assert "engine" in error_messages.lower()
         assert "instance_class" in error_messages.lower()
         assert "vpc_ref" in error_messages.lower()
@@ -432,28 +431,27 @@ class TestSchemaValidator:
         assert any("subnet_refs" in error.field_path for error in result.errors)
 
     def test_validate_resource_string_length_validation(self):
-        """Test validation of string length constraints."""
+        """Test validation of string type constraints."""
         validator = SchemaValidator()
         
-        # S3 logical_id has minLength: 3, maxLength: 63
-        s3_config_too_short = {
-            "logical_id": "s3"  # Only 2 characters, minimum is 3
+        # Test that string fields are validated for type correctness
+        vpc_config = {
+            "cidr": 12345  # Should be string, not integer
         }
         
-        result = validator.validate_resource("s3", s3_config_too_short)
+        result = validator.validate_resource("vpc", vpc_config)
         
         assert not result.is_valid
         assert len(result.errors) > 0
-        assert any("length" in error.message.lower() for error in result.errors)
+        assert any("type" in error.message.lower() for error in result.errors)
 
     def test_validate_resource_pattern_validation_detailed(self):
         """Test detailed pattern validation for various resource types."""
         validator = SchemaValidator()
         
-        # Test invalid logical_id pattern (uppercase not allowed)
+        # Test invalid CIDR pattern
         vpc_config = {
-            "logical_id": "VPC-Main",  # Contains uppercase
-            "cidr": "10.0.0.0/16"
+            "cidr": "10.0.0/16"  # Invalid CIDR format (missing last octet)
         }
         
         result = validator.validate_resource("vpc", vpc_config)
