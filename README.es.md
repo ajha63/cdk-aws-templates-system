@@ -4,17 +4,37 @@ Sistema de plantillas declarativas para AWS CDK que permite desplegar infraestru
 
 ## 🚀 Inicio Rápido
 
+### Requisitos Previos
+
+- Python 3.8+
+- Node.js 14+ (para AWS CDK CLI)
+- AWS CDK CLI 2.x: `npm install -g aws-cdk`
+- Credenciales AWS configuradas
+
+### Instalación
+
 ```bash
 # 1. Clonar el repositorio
-git clone <repository-url>
-cd cdk_templates
+git clone https://github.com/ajha63/cdk-aws-templates-system.git
+cd cdk-aws-templates-system
 
-# 2. Instalar dependencias
+# 2. Ejecutar el instalador automatizado (verifica todos los requisitos)
+./install.sh
+
+# O instalar manualmente:
 python -m venv venv
 source venv/bin/activate  # Windows: venv\Scripts\activate
 pip install -r requirements.txt
+pip install -e .
 
-# 3. Ejecutar el script de inicio rápido
+# 3. Instalar AWS CDK CLI (si no está instalado)
+npm install -g aws-cdk
+cdk --version
+
+# 4. Bootstrap de CDK (solo la primera vez)
+cdk bootstrap aws://ACCOUNT-ID/REGION
+
+# 5. Ejecutar el script de inicio rápido
 python quickstart.py
 ```
 
@@ -82,6 +102,7 @@ Genera el código CDK:
 ```python
 from cdk_templates.config_loader import ConfigurationLoader
 from cdk_templates.template_generator import TemplateGenerator
+import os
 
 # Cargar y generar
 loader = ConfigurationLoader()
@@ -91,12 +112,26 @@ generator = TemplateGenerator()
 result = generator.generate(config, environment='dev')
 
 # Guardar archivos
+output_dir = 'cdk-output'
+os.makedirs(output_dir, exist_ok=True)
+
 for file_path, content in result.generated_files.items():
-    with open(file_path, 'w') as f:
+    full_path = os.path.join(output_dir, file_path)
+    os.makedirs(os.path.dirname(full_path), exist_ok=True)
+    with open(full_path, 'w') as f:
         f.write(content)
+    print(f'Creado: {full_path}')
 ```
 
-Despliega con CDK:
+Despliega en AWS:
+
+```bash
+cd cdk-output
+pip install -r requirements.txt
+cdk synth    # Verificar el CloudFormation generado
+cdk diff     # Ver qué se creará/modificará
+cdk deploy   # Desplegar en AWS
+```
 
 ```bash
 cdk synth

@@ -26,12 +26,21 @@ CDK AWS Templates System is a Python framework that enables you to deploy AWS in
 
 ## 🚀 Quick Start
 
+### Prerequisites
+
+- Python 3.8+
+- Node.js 14+ (for AWS CDK CLI)
+- AWS CDK CLI 2.x: `npm install -g aws-cdk`
+- AWS credentials configured
+
+### Installation
+
 ```bash
 # 1. Clone the repository
 git clone https://github.com/ajha63/cdk-aws-templates-system.git
 cd cdk-aws-templates-system
 
-# 2. Run the automated installer
+# 2. Run the automated installer (checks all prerequisites)
 ./install.sh
 
 # Or install manually:
@@ -40,7 +49,14 @@ source venv/bin/activate  # Windows: venv\Scripts\activate
 pip install -r requirements.txt
 pip install -e .
 
-# 3. Run the interactive quickstart
+# 3. Install AWS CDK CLI (if not already installed)
+npm install -g aws-cdk
+cdk --version
+
+# 4. Bootstrap CDK (first time only)
+cdk bootstrap aws://ACCOUNT-ID/REGION
+
+# 5. Run the interactive quickstart
 python quickstart.py
 ```
 
@@ -87,6 +103,7 @@ Generate CDK code:
 ```python
 from cdk_templates.config_loader import ConfigurationLoader
 from cdk_templates.template_generator import TemplateGenerator
+import os
 
 loader = ConfigurationLoader()
 config = loader.load_config(['my-infrastructure.yaml'])
@@ -94,9 +111,26 @@ config = loader.load_config(['my-infrastructure.yaml'])
 generator = TemplateGenerator()
 result = generator.generate(config, environment='dev')
 
+# Save generated files
+output_dir = 'cdk-output'
+os.makedirs(output_dir, exist_ok=True)
+
 for file_path, content in result.generated_files.items():
-    with open(file_path, 'w') as f:
+    full_path = os.path.join(output_dir, file_path)
+    os.makedirs(os.path.dirname(full_path), exist_ok=True)
+    with open(full_path, 'w') as f:
         f.write(content)
+    print(f'Created: {full_path}')
+```
+
+Deploy to AWS:
+
+```bash
+cd cdk-output
+pip install -r requirements.txt
+cdk synth    # Verify the generated CloudFormation
+cdk diff     # See what will be created/changed
+cdk deploy   # Deploy to AWS
 ```
 
 Deploy with CDK:

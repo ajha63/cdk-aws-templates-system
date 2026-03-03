@@ -53,6 +53,73 @@ fi
 
 print_success "pip3 encontrado"
 
+# Verificar Node.js
+print_info "Verificando Node.js..."
+if ! command -v node &> /dev/null; then
+    print_warning "Node.js no está instalado"
+    print_info "Node.js es necesario para AWS CDK CLI"
+    echo ""
+    echo "Para instalar Node.js:"
+    echo "  macOS:         brew install node"
+    echo "  Ubuntu/Debian: curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash - && sudo apt-get install -y nodejs"
+    echo "  Windows:       Descarga desde https://nodejs.org/"
+    echo ""
+else
+    node_version=$(node --version)
+    print_success "Node.js $node_version encontrado"
+fi
+
+# Verificar npm
+if command -v npm &> /dev/null; then
+    npm_version=$(npm --version)
+    print_success "npm $npm_version encontrado"
+fi
+
+# Verificar AWS CDK CLI
+print_info "Verificando AWS CDK CLI..."
+if ! command -v cdk &> /dev/null; then
+    print_warning "AWS CDK CLI no está instalado"
+    print_info "AWS CDK CLI es necesario para desplegar stacks en AWS"
+    echo ""
+    if command -v npm &> /dev/null; then
+        read -p "¿Deseas instalar AWS CDK CLI ahora? (S/n): " -n 1 -r
+        echo
+        if [[ ! $REPLY =~ ^[Nn]$ ]]; then
+            print_info "Instalando AWS CDK CLI..."
+            npm install -g aws-cdk
+            if command -v cdk &> /dev/null; then
+                cdk_version=$(cdk --version)
+                print_success "AWS CDK CLI $cdk_version instalado"
+            else
+                print_warning "No se pudo instalar AWS CDK CLI automáticamente"
+                echo "Intenta manualmente: npm install -g aws-cdk"
+            fi
+        fi
+    else
+        echo "Para instalar AWS CDK CLI:"
+        echo "  npm install -g aws-cdk"
+        echo ""
+    fi
+else
+    cdk_version=$(cdk --version)
+    print_success "AWS CDK CLI $cdk_version encontrado"
+fi
+
+# Verificar AWS credentials
+print_info "Verificando credenciales de AWS..."
+if [ -f "$HOME/.aws/credentials" ] || [ ! -z "$AWS_ACCESS_KEY_ID" ]; then
+    print_success "Credenciales de AWS configuradas"
+else
+    print_warning "No se encontraron credenciales de AWS"
+    print_info "Para configurar AWS:"
+    echo "  aws configure"
+    echo "  O configura variables de entorno:"
+    echo "    export AWS_ACCESS_KEY_ID=tu_access_key"
+    echo "    export AWS_SECRET_ACCESS_KEY=tu_secret_key"
+    echo "    export AWS_DEFAULT_REGION=us-east-1"
+    echo ""
+fi
+
 # Crear entorno virtual
 print_info "Creando entorno virtual..."
 if [ -d "venv" ]; then
@@ -146,6 +213,13 @@ echo "  python quickstart.py"
 echo ""
 print_info "Para ejecutar tests:"
 echo "  pytest tests/ -v"
+echo ""
+print_info "Para desplegar en AWS (después de generar el código):"
+echo "  cd output_directory"
+echo "  cdk deploy"
+echo ""
+print_info "Para hacer bootstrap de CDK (primera vez):"
+echo "  cdk bootstrap aws://ACCOUNT-ID/REGION"
 echo ""
 print_info "Para generar código CDK desde una configuración:"
 echo "  python -c \"

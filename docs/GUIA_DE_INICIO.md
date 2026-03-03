@@ -15,10 +15,77 @@ El CDK AWS Templates System es un framework en Python que te permite desplegar i
 
 ## Requisitos Previos
 
-- Python 3.8 o superior
-- AWS CDK instalado (`npm install -g aws-cdk`)
-- Credenciales AWS configuradas
-- Conocimientos básicos de AWS y CDK
+### Software Necesario
+
+1. **Python 3.8 o superior**
+   ```bash
+   python3 --version
+   ```
+
+2. **Node.js 14.x o superior** (para AWS CDK CLI)
+   ```bash
+   node --version
+   ```
+
+3. **AWS CDK CLI 2.x**
+   ```bash
+   # Instalar globalmente
+   npm install -g aws-cdk
+   
+   # Verificar instalación
+   cdk --version
+   ```
+
+4. **AWS CLI** (opcional pero recomendado)
+   ```bash
+   # macOS
+   brew install awscli
+   
+   # Ubuntu/Debian
+   sudo apt-get install awscli
+   
+   # Windows
+   # Descarga desde: https://aws.amazon.com/cli/
+   ```
+
+### Configurar Credenciales AWS
+
+Antes de usar el sistema, necesitas configurar tus credenciales de AWS:
+
+```bash
+# Opción 1: Usar AWS CLI (recomendado)
+aws configure
+
+# Opción 2: Variables de entorno
+export AWS_ACCESS_KEY_ID=tu_access_key
+export AWS_SECRET_ACCESS_KEY=tu_secret_key
+export AWS_DEFAULT_REGION=us-east-1
+
+# Opción 3: Archivo de credenciales (~/.aws/credentials)
+[default]
+aws_access_key_id = tu_access_key
+aws_secret_access_key = tu_secret_key
+```
+
+### Bootstrap de AWS CDK (Primera Vez)
+
+Si es la primera vez que usas CDK en tu cuenta de AWS, necesitas hacer bootstrap:
+
+```bash
+# Bootstrap para una región específica
+cdk bootstrap aws://ACCOUNT-ID/REGION
+
+# Ejemplo:
+cdk bootstrap aws://123456789012/us-east-1
+```
+
+El bootstrap crea los recursos necesarios en tu cuenta de AWS (bucket S3, roles IAM, etc.) para que CDK pueda desplegar stacks.
+
+### Conocimientos Recomendados
+
+- Conceptos básicos de AWS (VPC, EC2, RDS, S3)
+- Familiaridad con YAML o JSON
+- Conocimientos básicos de AWS CDK (opcional)
 
 ## Instalación
 
@@ -115,6 +182,7 @@ else:
 ```python
 from cdk_templates.config_loader import ConfigurationLoader
 from cdk_templates.template_generator import TemplateGenerator
+import os
 
 # Cargar configuración
 loader = ConfigurationLoader()
@@ -127,28 +195,103 @@ result = generator.generate(config, environment='dev')
 if result.success:
     print('✓ Código CDK generado exitosamente')
     
+    # Crear directorio de salida
+    output_dir = 'cdk-output'
+    os.makedirs(output_dir, exist_ok=True)
+    
     # Guardar archivos generados
     for file_path, content in result.generated_files.items():
-        with open(file_path, 'w') as f:
+        full_path = os.path.join(output_dir, file_path)
+        os.makedirs(os.path.dirname(full_path), exist_ok=True)
+        with open(full_path, 'w') as f:
             f.write(content)
-        print(f'  Creado: {file_path}')
+        print(f'  Creado: {full_path}')
 else:
     print('✗ Errores en la generación:')
     for error in result.errors:
         print(f'  - {error}')
 ```
 
-### Paso 4: Desplegar con CDK
+### Paso 4: Revisar el Código Generado
+
+El código CDK generado estará en el directorio `cdk-output/`:
 
 ```bash
-# Inicializar CDK (solo la primera vez)
-cdk bootstrap
+cd cdk-output
+ls -la
 
-# Sintetizar el stack
+# Verás archivos como:
+# - app.py           # Punto de entrada de CDK
+# - stack_*.py       # Definiciones de stacks
+# - cdk.json         # Configuración de CDK
+# - requirements.txt # Dependencias Python
+```
+
+### Paso 5: Instalar Dependencias CDK
+
+```bash
+# Dentro del directorio cdk-output
+pip install -r requirements.txt
+```
+
+### Paso 6: Sintetizar el Stack (Verificación)
+
+Antes de desplegar, verifica que el código CDK es válido:
+
+```bash
+# Sintetizar genera el template CloudFormation sin desplegarlo
 cdk synth
 
-# Desplegar
-cdk deploy
+# Esto mostrará el template CloudFormation en YAML
+# Si hay errores, se mostrarán aquí
+```
+
+### Paso 7: Ver los Cambios (Diff)
+
+Para ver qué recursos se crearán o modificarán:
+
+```bash
+cdk diff
+
+# Esto muestra:
+# - Recursos nuevos (verde)
+# - Recursos modificados (amarillo)
+# - Recursos eliminados (rojo)
+```
+
+### Paso 8: Desplegar en AWS
+
+```bash
+# Desplegar todos los stacks
+cdk deploy --all
+
+# O desplegar un stack específico
+cdk deploy MiProyecto-Dev-NetworkStack
+
+# Con confirmación automática (útil para CI/CD)
+cdk deploy --all --require-approval never
+```
+
+### Paso 9: Verificar el Despliegue
+
+```bash
+# Ver los stacks desplegados
+aws cloudformation list-stacks --stack-status-filter CREATE_COMPLETE UPDATE_COMPLETE
+
+# Ver los recursos de un stack
+aws cloudformation describe-stack-resources --stack-name MiProyecto-Dev-NetworkStack
+```
+
+### Paso 10: Destruir Recursos (Cleanup)
+
+Cuando ya no necesites los recursos:
+
+```bash
+# Destruir todos los stacks
+cdk destroy --all
+
+# O destruir un stack específico
+cdk destroy MiProyecto-Dev-NetworkStack
 ```
 
 ## Ejemplos Comunes

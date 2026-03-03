@@ -83,6 +83,9 @@ types-jsonschema>=4.17.0 # Type hints para jsonschema
 - **Python**: 3.8 o superior
 - **pip**: Última versión
 - **Git**: Para clonar el repositorio
+- **Node.js**: 14.x o superior (para AWS CDK CLI)
+- **npm**: 6.x o superior (incluido con Node.js)
+- **AWS CDK Toolkit**: 2.x (se instala con npm)
 - **Sistema Operativo**: Linux, macOS, o Windows
 
 ### Verificar Requisitos
@@ -96,7 +99,74 @@ pip3 --version
 
 # Verificar Git
 git --version
+
+# Verificar Node.js
+node --version  # Debe ser 14.x o superior
+
+# Verificar npm
+npm --version  # Debe ser 6.x o superior
 ```
+
+## 🛠️ Instalar AWS CDK Toolkit
+
+El AWS CDK Toolkit es necesario para desplegar los stacks generados en AWS.
+
+### Instalar Node.js (si no está instalado)
+
+```bash
+# macOS (con Homebrew)
+brew install node
+
+# Ubuntu/Debian
+curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
+sudo apt-get install -y nodejs
+
+# Windows
+# Descarga desde: https://nodejs.org/
+```
+
+### Instalar AWS CDK CLI Globalmente
+
+```bash
+# Instalar AWS CDK CLI
+npm install -g aws-cdk
+
+# Verificar instalación
+cdk --version  # Debe mostrar 2.x.x
+```
+
+### Configurar AWS Credentials
+
+Antes de usar CDK, necesitas configurar tus credenciales de AWS:
+
+```bash
+# Opción 1: Usar AWS CLI
+aws configure
+
+# Opción 2: Variables de entorno
+export AWS_ACCESS_KEY_ID=tu_access_key
+export AWS_SECRET_ACCESS_KEY=tu_secret_key
+export AWS_DEFAULT_REGION=us-east-1
+
+# Opción 3: Archivo de credenciales (~/.aws/credentials)
+[default]
+aws_access_key_id = tu_access_key
+aws_secret_access_key = tu_secret_key
+```
+
+### Bootstrap del Entorno CDK (Primera vez)
+
+Si es la primera vez que usas CDK en tu cuenta de AWS:
+
+```bash
+# Bootstrap para una región específica
+cdk bootstrap aws://ACCOUNT-ID/REGION
+
+# Ejemplo:
+cdk bootstrap aws://123456789012/us-east-1
+```
+
+El bootstrap crea los recursos necesarios en tu cuenta de AWS para que CDK pueda desplegar stacks.
 
 ## 📖 Después de la Instalación
 
@@ -151,6 +221,61 @@ sudo apt-get install python3.11
 
 # Windows
 # Descarga desde: https://www.python.org/downloads/
+```
+
+### Error: "node: command not found" o "npm: command not found"
+
+**Solución**: Instala Node.js y npm
+
+```bash
+# macOS (con Homebrew)
+brew install node
+
+# Ubuntu/Debian
+curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
+sudo apt-get install -y nodejs
+
+# Windows
+# Descarga desde: https://nodejs.org/
+```
+
+### Error: "cdk: command not found"
+
+**Solución**: Instala AWS CDK CLI
+
+```bash
+npm install -g aws-cdk
+
+# Si tienes problemas de permisos en macOS/Linux:
+sudo npm install -g aws-cdk
+
+# Verificar instalación
+cdk --version
+```
+
+### Error: "Unable to resolve AWS account to use"
+
+**Solución**: Configura tus credenciales de AWS
+
+```bash
+# Opción 1: Usar AWS CLI
+aws configure
+
+# Opción 2: Variables de entorno
+export AWS_ACCESS_KEY_ID=tu_access_key
+export AWS_SECRET_ACCESS_KEY=tu_secret_key
+export AWS_DEFAULT_REGION=us-east-1
+```
+
+### Error: "This stack uses assets, so the toolkit stack must be deployed"
+
+**Solución**: Ejecuta bootstrap de CDK
+
+```bash
+cdk bootstrap aws://ACCOUNT-ID/REGION
+
+# Ejemplo:
+cdk bootstrap aws://123456789012/us-east-1
 ```
 
 ### Error: "pip: command not found"
