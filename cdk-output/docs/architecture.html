@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Infrastructure Documentation</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 1200px; margin: 0 auto; padding: 20px; }
+        h1 { color: #232F3E; border-bottom: 2px solid #FF9900; }
+        h2 { color: #232F3E; border-bottom: 1px solid #FF9900; margin-top: 30px; }
+        h3 { color: #545B64; }
+        code { background-color: #f4f4f4; padding: 2px 6px; border-radius: 3px; }
+        pre { background-color: #f4f4f4; padding: 15px; border-radius: 5px; overflow-x: auto; }
+        table { border-collapse: collapse; width: 100%; margin: 15px 0; }
+        th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
+        th { background-color: #232F3E; color: white; }
+        tr:nth-child(even) { background-color: #f9f9f9; }
+        ul { line-height: 1.8; }
+    </style>
+</head>
+<body>
+<h1>Infrastructure Documentation: ejemplo-basico</h1>
+<br>
+<p><strong>Description:</strong> Ejemplo básico de VPC con CDK Templates</p>
+<p><strong>Owner:</strong> equipo-infraestructura</p>
+<p><strong>Cost Center:</strong> ingenieria</p>
+<br>
+<h2>Architecture Diagram</h2>
+<br>
+<pre><code>
+graph TB
+    vpc_ejemplo[&quot;vpc-ejemplo\n[vpc]&quot;]
+</pre>
+<br>
+<h2>Environments</h2>
+<br>
+<h3>dev</h3>
+<ul>
+<li><strong>Account ID:</strong> 123456789012</li>
+<li><strong>Region:</strong> us-east-1</li>
+</ul>
+<br>
+<h2>Resources</h2>
+<br>
+<h3>vpc-ejemplo</h3>
+<br>
+<p><strong>Type:</strong> <code>vpc</code></p>
+<br>
+<p><strong>Configuration:</strong></p>
+<br>
+<ul>
+<li><strong>cidr:</strong> <code>10.0.0.0/16</code></li>
+<li><strong>availability_zones:</strong> <code>2</code></li>
+<li><strong>enable_dns_hostnames:</strong> <code>True</code></li>
+<li><strong>enable_dns_support:</strong> <code>True</code></li>
+<li><strong>enable_flow_logs:</strong> <code>True</code></li>
+<li><strong>nat_gateways:</strong> <code>1</code></li>
+</ul>
+<br>
+<p><strong>Tags:</strong></p>
+<br>
+<ul>
+<li>Component: networking</li>
+<li>Purpose: ejemplo</li>
+</ul>
+<br>
+<br>
+</body>
+</html>
